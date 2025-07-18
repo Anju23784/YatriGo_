@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import upload from "../middlewares/multer.js";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { Post } from "../models/post.model.js";
@@ -20,6 +21,23 @@ export const register = async (req, res) => {
                 success: false,
             });
         };
+        // Check for existing email
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+            return res.status(401).json({
+                message: "Email already in use. Try a different one.",
+                success: false,
+            });
+        }
+
+        // ✅ Check for existing username
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            return res.status(401).json({
+                message: "Username already taken. Try a different one.",
+                success: false,
+            });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         await User.create({
             username,
@@ -58,6 +76,19 @@ export const login = async (req, res) => {
             });
         };
 
+        //jab tak token saved hai cookie mein tak tak logged in rehta hai else logged out
+        const token = await jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: '1d' });
+
+        // populate each post if in the posts array
+        const populatedPosts = await Promise.all(
+            user.posts.map( async (postId) => {
+                const post = await Post.findById(postId);
+                if(post.author.equals(user._id)){
+                    return post;
+                }
+                return null;
+            })
+        )
         user = {
             _id: user._id,
             username: user.username,
@@ -66,32 +97,18 @@ export const login = async (req, res) => {
             bio: user.bio,
             followers: user.followers,
             following: user.following,
-            // posts: populatedPosts
-            posts : user.posts
+            posts: populatedPosts
+          
         }
 
-        //jab tak token saved hai cookie mein tak tak logged in rehta hai else logged out
-        const token = await jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: '1d' });
-        return res.cookie('token', token, {httpOnly: true, sameSite:'strict', maxAge: 1*24*60*60*1000}).json({
-            message:`Welcome back ${user.username}`,
-            success: true
-        })
-        // // populate each post if in the posts array
-        // const populatedPosts = await Promise.all(
-        //     user.posts.map( async (postId) => {
-        //         const post = await Post.findById(postId);
-        //         if(post.author.equals(user._id)){
-        //             return post;
-        //         }
-        //         return null;
-        //     })
-        // )
         
-        // return res.cookie('token', token, { httpOnly: true, sameSite: 'strict', maxAge: 1 * 24 * 60 * 60 * 1000 }).json({
-        //     message: `Welcome back ${user.username}`,
-        //     success: true,
-        //     user
-        // });
+        
+        
+        return res.cookie('token', token, { httpOnly: true, sameSite: 'strict', maxAge: 1 * 24 * 60 * 60 * 1000 }).json({
+            message: `Welcome back ${user.username}`,
+            success: true,
+            user
+        });
 
     } catch (error) {
         console.log(error);
@@ -111,6 +128,7 @@ export const getProfile = async (req, res) => {
     try {
         const userId = req.params.id;
         // let user = await User.findById(userId).populate({path:'posts', createdAt:-1}).populate('bookmarks');
+        let user = await User.findById(userId).select('-password')
         return res.status(200).json({
             user,
             success: true
@@ -125,6 +143,8 @@ export const editProfile = async (req, res) => {
         const userId = req.id;
         const { bio, gender } = req.body;
         const profilePicture = req.file;
+        console.log(req.file); // file metadata
+    console.log(req.body); // other form data
         let cloudResponse;
 
         if (profilePicture) {

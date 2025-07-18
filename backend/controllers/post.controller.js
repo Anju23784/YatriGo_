@@ -14,6 +14,7 @@ export const addNewPost = async (req, res) => {
         if (!image) return res.status(400).json({ message: 'Image required' });
 
         // image upload 
+        //sharp to optimize image
         const optimizedImageBuffer = await sharp(image.buffer)
             .resize({ width: 800, height: 800, fit: 'inside' })
             .toFormat('jpeg', { quality: 80 })
@@ -48,13 +49,13 @@ export const addNewPost = async (req, res) => {
 export const getAllPost = async (req, res) => {
     try {
         const posts = await Post.find().sort({ createdAt: -1 })
-            .populate({ path: 'author', select: 'username profilePicture' })
+            .populate({ path: 'author', select: 'username, profilePicture' })
             .populate({
                 path: 'comments',
                 sort: { createdAt: -1 },
                 populate: {
                     path: 'author',
-                    select: 'username profilePicture'
+                    select: 'username, profilePicture'
                 }
             });
         return res.status(200).json({
@@ -98,22 +99,22 @@ export const likePost = async (req, res) => {
         await post.updateOne({ $addToSet: { likes: likeKrneWalaUserKiId } });
         await post.save();
 
-        // implement socket io for real time notification
-        const user = await User.findById(likeKrneWalaUserKiId).select('username profilePicture');
+        // // implement socket io for real time notification
+        // const user = await User.findById(likeKrneWalaUserKiId).select('username profilePicture');
          
-        const postOwnerId = post.author.toString();
-        if(postOwnerId !== likeKrneWalaUserKiId){
-            // emit a notification event
-            const notification = {
-                type:'like',
-                userId:likeKrneWalaUserKiId,
-                userDetails:user,
-                postId,
-                message:'Your post was liked'
-            }
-            const postOwnerSocketId = getReceiverSocketId(postOwnerId);
-            io.to(postOwnerSocketId).emit('notification', notification);
-        }
+        // const postOwnerId = post.author.toString();
+        // if(postOwnerId !== likeKrneWalaUserKiId){
+        //     // emit a notification event
+        //     const notification = {
+        //         type:'like',
+        //         userId:likeKrneWalaUserKiId,
+        //         userDetails:user,
+        //         postId,
+        //         message:'Your post was liked'
+        //     }
+        //     const postOwnerSocketId = getReceiverSocketId(postOwnerId);
+        //     io.to(postOwnerSocketId).emit('notification', notification);
+        // }
 
         return res.status(200).json({message:'Post liked', success:true});
     } catch (error) {
@@ -132,20 +133,20 @@ export const dislikePost = async (req, res) => {
         await post.save();
 
         // implement socket io for real time notification
-        const user = await User.findById(likeKrneWalaUserKiId).select('username profilePicture');
-        const postOwnerId = post.author.toString();
-        if(postOwnerId !== likeKrneWalaUserKiId){
-            // emit a notification event
-            const notification = {
-                type:'dislike',
-                userId:likeKrneWalaUserKiId,
-                userDetails:user,
-                postId,
-                message:'Your post was liked'
-            }
-            const postOwnerSocketId = getReceiverSocketId(postOwnerId);
-            io.to(postOwnerSocketId).emit('notification', notification);
-        }
+        // const user = await User.findById(likeKrneWalaUserKiId).select('username profilePicture');
+        // const postOwnerId = post.author.toString();
+        // if(postOwnerId !== likeKrneWalaUserKiId){
+        //     // emit a notification event
+        //     const notification = {
+        //         type:'dislike',
+        //         userId:likeKrneWalaUserKiId,
+        //         userDetails:user,
+        //         postId,
+        //         message:'Your post was liked'
+        //     }
+        //     const postOwnerSocketId = getReceiverSocketId(postOwnerId);
+        //     io.to(postOwnerSocketId).emit('notification', notification);
+        // }
 
 
 
@@ -169,12 +170,14 @@ export const addComment = async (req,res) =>{
             text,
             author:commentKrneWalaUserKiId,
             post:postId
-        })
-
-        await comment.populate({
+        }).populate({
             path:'author',
-            select:"username profilePicture"
+            select:"username, profilePicture"
         });
+        // await comment.populate({
+        //     path:'author',
+        //     select:"username profilePicture"
+        // });
         
         post.comments.push(comment._id);
         await post.save();
@@ -193,7 +196,7 @@ export const getCommentsOfPost = async (req,res) => {
     try {
         const postId = req.params.id;
 
-        const comments = await Comment.find({post:postId}).populate('author', 'username profilePicture');
+        const comments = await Comment.find({post:postId}).populate('author', 'username, profilePicture');
 
         if(!comments) return res.status(404).json({message:'No comments found for this post', success:false});
 
