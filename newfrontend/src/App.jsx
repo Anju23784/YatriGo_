@@ -10,11 +10,11 @@ import ProtectedRoutes from './components/ProtectedRoutes'
 const browserRouter = createBrowserRouter([
   {
     path: "/",
-    element: <ProtectedRoutes><MainLayout /></ProtectedRoutes>,
+    element: <MainLayout />,
     children: [
       {
         path: '/',
-        element: <ProtectedRoutes><Home /></ProtectedRoutes>
+        element: <Home/>
       },
       {
         path: '/profile',

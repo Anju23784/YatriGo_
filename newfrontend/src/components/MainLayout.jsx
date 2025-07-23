@@ -1,15 +1,16 @@
 import React from 'react'
-// import { Outlet } from 'react-router-dom'
-// import LeftSidebar from './LeftSidebar'
+import LeftSidebar from './LeftSidebar'
+import { Outlet } from 'react-router-dom'
+import RightSidebar from './RightSidebar'
 
 const MainLayout = () => {
   return (
     <div>
-         {/* <LeftSidebar/>
+         { <LeftSidebar/>}
         <div>
             <Outlet/>
-        </div> */}
-        Sidebar
+        </div> 
+        {/* { <RightSidebar/>} */}
     </div>
   )
 }
