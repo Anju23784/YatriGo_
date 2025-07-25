@@ -4,9 +4,10 @@ import Signup from './components/Signup'
 import Login from './components/Login'
 import Home from './components/home'
 import MainLayout from './components/MainLayout'
-import Profile from './Profile'
+import Profile from './components/Profile'
 import { Toaster } from './components/ui/sonner'
 import ProtectedRoutes from './components/ProtectedRoutes'
+
 const browserRouter = createBrowserRouter([
   {
     path: "/",
@@ -17,8 +18,8 @@ const browserRouter = createBrowserRouter([
         element: <Home/>
       },
       {
-        path: '/profile',
-        element: <ProtectedRoutes> <Profile /></ProtectedRoutes>
+        path: '/profile/:id',
+        element: <Profile />
       },
       // {
       //   path: '/account/edit',
