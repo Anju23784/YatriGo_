@@ -27,15 +27,15 @@ export const sendMessage = async (req,res) => {
         await Promise.all([conversation.save(),newMessage.save()])
 
         // implement socket io for real time data transfer
-        // const receiverSocketId = getReceiverSocketId(receiverId);
-        // if(receiverSocketId){
-        //     io.to(receiverSocketId).emit('newMessage', newMessage);
-        // }
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit('newMessage', newMessage);
+        }
 
-        // return res.status(201).json({
-        //     success:true,
-        //     newMessage
-        // })
+        return res.status(201).json({
+            success:true,
+            newMessage
+        })
     } catch (error) {
         console.log(error);
     }
@@ -46,8 +46,8 @@ export const getMessage = async (req,res) => {
         const receiverId = req.params.id;
         const conversation = await Conversation.findOne({
             participants:{$all: [senderId, receiverId]}
-        // }).populate('messages');
-        });
+        }).populate('messages');
+     
         if(!conversation) return res.status(200).json({success:true, messages:[]});
 
         return res.status(200).json({success:true, messages:conversation?.messages});

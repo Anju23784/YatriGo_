@@ -96,16 +96,16 @@ const Post = ({ post }) => {
         }
     }
 
-    // const bookmarkHandler = async () => {
-    //     try {
-    //         const res = await axios.get(`https://instaclone-g9h5.onrender.com/api/v1/post/${post?._id}/bookmark`, {withCredentials:true});
-    //         if(res.data.success){
-    //             toast.success(res.data.message);
-    //         }
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    const bookmarkHandler = async () => {
+        try {
+            const res = await axios.get(`http://localhost:8000/api/v1/post/${post?._id}/bookmark`, {withCredentials:true});
+            if(res.data.success){
+                toast.success(res.data.message);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
     return (
         <div className='my-8 w-full max-w-sm mx-auto'>
             <div className='flex items-center justify-between'>
@@ -126,15 +126,15 @@ const Post = ({ post }) => {
                         <MoreHorizontal className='cursor-pointer' />
                     </DialogTrigger>
                     <DialogContent className="flex flex-col items-center text-sm text-center">
-                        {/* {
+                        {
                         post?.author?._id !== user?._id && <Button variant='ghost' className="cursor-pointer w-fit text-[#ED4956] font-bold">Unfollow</Button>
-                        } */}
+                        }
                         
                         <Button variant='ghost' className="cursor-pointer w-fit">Add to favorites</Button>
                         {
                             user && user?._id === post?.author._id && <Button onClick={deletePostHandler} variant='ghost' className="cursor-pointer w-fit">Delete</Button>
                         }
-                        <Button variant='ghost' className="cursor-pointer w-fit">Unfollow</Button>
+                        {/* <Button variant='ghost' className="cursor-pointer w-fit">Unfollow</Button> */}
                     </DialogContent>
                 </Dialog>
             </div>
@@ -157,7 +157,7 @@ const Post = ({ post }) => {
                     }} className='cursor-pointer hover:text-gray-600' />
                     <Send className='cursor-pointer hover:text-gray-600' />
                 </div>
-                {/* <Bookmark onClick={bookmarkHandler} className='cursor-pointer hover:text-gray-600' /> */}
+                <Bookmark onClick={bookmarkHandler} className='cursor-pointer hover:text-gray-600' />
             </div>
            
             <span className='font-medium block mb-2'> {postLike} likes </span>
