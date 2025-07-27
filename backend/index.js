@@ -42,7 +42,7 @@ app.use("/api/v1/message", messageRoute);
 
 
 app.use(express.static(path.join(__dirname, "/newfrontend/dist")));
-app.get("*", (req,res)=>{
+app.get("*", (_,res)=>{
     res.sendFile(path.resolve(__dirname, "newfrontend", "dist", "index.html"));
 })
 
