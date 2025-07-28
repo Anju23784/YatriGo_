@@ -57,7 +57,7 @@ const CreatePost = ({ open, setOpen }) => {
 
   return (
     <Dialog open={open}  onOpenChange={setOpen}>
-      <DialogContent onInteractOutside={() => setOpen(false)} className={bg-white}>
+      <DialogContent onInteractOutside={() => setOpen(false)}  className="bg-white">
          <DialogHeader>
   <DialogTitle className='text-center font-semibold'>Create New Post</DialogTitle>
   <DialogDescription className='text-center text-sm text-muted-foreground'>
