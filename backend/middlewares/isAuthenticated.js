@@ -18,7 +18,11 @@ const isAuthenticated = async (req,res,next)=>{
         req.id = decode.userId;
         next();
     } catch (error) {
-        console.log(error);
+        // console.log("JWT verification failed:", error.message);
+        return res.status(401).json({
+        message: 'Unauthorized. Token is invalid or expired.',
+        success: false
+        });
     }
 }
 export default isAuthenticated;
